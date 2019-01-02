@@ -23,7 +23,6 @@ class Epw
 	WMV_XPATH = "//div[@id='ePsdDl']/a/@href"
 	IMG_XPATH = "//div[@class='rg_meta notranslate']"
 	#IMG_XPATH = "//div[@jscontroller='Q7Rsec']"
-	#IMG_XPATH = "//body"
 	USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.63 Safari/537.36'
 
 	def output_html
@@ -32,11 +31,9 @@ class Epw
 		get_known_list
 		get_known_collo_list
 
-#		base_html = get_html_template
 		words_htmls = get_words_htmls
 		csv = words_htmls.join("\n")
 
-		#	output csv
 	end
 
 	private
@@ -58,8 +55,6 @@ class Epw
 		@all_doc = @all_doc.gsub(/\s+/," ")
 		@all_doc = @all_doc.gsub(/(?:^|.|,)[A-Z][a-z]+/){|s| s.downcase}
 		@all_doc = @all_doc.gsub(/[^a-zA-Z\s\.,]+/,"")
-		#if @all_doc.match(/(\s|\.|,)+the(\s|\.|,)+/,"")
-		#@all_doc = @all_doc.gsub(/(\s\.,)+([A-Z])[a-z]+/,"#{$2.downcase}")
 		@all_doc = @all_doc.gsub(/(\s|\.|,)+an\s/,'\1')
 		@all_doc = @all_doc.gsub(/\san(\.|,|\s)+/,'\1')
 		@all_doc = @all_doc.gsub(/(\s|\.|,)+a\s/,'\1')
@@ -94,14 +89,6 @@ class Epw
 			end
 		end
 	end
-	#def get_words
-	#@words = File.open("epw.words", "r") {|f|f.read}.split("\n")
-	#if @words.size == 0
-	#puts "no word in epw.words"
-	#exit
-	#end
-	#end
-
 
 	def known_collo_chk(w)
 		w.split("\s").each {|word|
@@ -117,10 +104,6 @@ class Epw
 	def sort_words
 		@words.sort!
 	end
-
-#	def get_html_template
-#		File.open("epw.html.template", "r") {|f|f.read}
-#	end
 
 	def get_words_htmls
 		File.open("epw_test.csv", "w") do |f|
@@ -151,16 +134,9 @@ class Epw
 					end
 					w = w.gsub(/ $/,"")
 					known_collo_chk(w)
-					#if @known_word.include?(w) then
-					#				puts "#{w}は既出なのでスキップします"
-					#				@all_sents_now[sent_cnt] = @all_sents_now[sent_cnt].gsub(/(^|\s)#{w}(\s+|$)/,"")
-					#				@all_sents_now[sent_cnt].gsub!(/(^\s)|(\s$)/,"")
-					#				next
-					#end
 					known_collo_flg = known_collo_chk(w)
 					known_flg = 0
 					@known_word.each {|kword|
-						#kword AB CDE FG  w CDE 
 						if kword =~ /(^#{w}(\s|$))|(\s#{w}(\s|$))/ then
 							puts "#{w}は#{kword}にて既出なのでスキップします"
 							known_flg = 1
@@ -401,11 +377,6 @@ class Epw
 		end
 	end
 
-	def output(html)
-		File.open("epw_test.csv", "w") do |f|
-			f.puts html
-		end
-	end
 	class WTYPEError < StandardError
 	end
 	class MEANSError < StandardError
