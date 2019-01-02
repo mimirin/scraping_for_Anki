@@ -4,6 +4,7 @@ require "nokogiri"
 require "pp"
 require "json"
 
+
 class Epw
 
 	COLLOCATION = 3
