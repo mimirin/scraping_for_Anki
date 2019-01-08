@@ -41,7 +41,6 @@ class Epw
 	def get_words
 		@org_form_list = []
 		@all_doc = File.open("epw.txt", "r"){|f|f.read}
-		#@all_doc.downcase!
 		@all_doc = @all_doc.gsub(/\n+/,".")
 		@all_doc = @all_doc.gsub(/\.+/,".")
 		@all_doc = @all_doc.gsub(/[-\n]+/," ")
@@ -51,8 +50,10 @@ class Epw
 		while reg.match(@all_doc) do
 			@all_doc = @all_doc.sub(/#{reg}(.*?\.)/){"#{$2}#{$1.gsub(/[^a-zA-Z\s]/,"")}\."}
 		end
-		@all_doc = @all_doc.gsub(/\s+(\.|,)/,'\1')
-		@all_doc = @all_doc.gsub(/(\.|,)\s+/,'\1')
+		#@all_doc = @all_doc.gsub(/\s+(\.|,)/,'\1')
+		#@all_doc = @all_doc.gsub(/(\.|,)\s+/,'\1')
+		@all_doc = @all_doc.gsub(/\s+(\.|,)/){$1}
+		@all_doc = @all_doc.gsub(/(\.|,)\s+/){$1}
 		@all_doc = @all_doc.gsub(/\s+/," ")
 		@all_doc = @all_doc.gsub(/(?:^|.|,)[A-Z][a-z]+/){|s| s.downcase}
 		@all_doc = @all_doc.gsub(/[^a-zA-Z\s\.,]+/,"")
@@ -92,14 +93,6 @@ class Epw
 			end
 		end
 	end
-	#def get_words
-	#@words = File.open("epw.words", "r") {|f|f.read}.split("\n")
-	#if @words.size == 0
-	#puts "no word in epw.words"
-	#exit
-	#end
-	#end
-
 
 	def known_collo_chk(w)
 		w.split("\s").each {|word|
@@ -146,12 +139,6 @@ class Epw
 					end
 					w = w.gsub(/ $/,"")
 					known_collo_chk(w)
-					#if @known_word.include?(w) then
-					#				puts "#{w}は既出なのでスキップします"
-					#				@all_sents_now[sent_cnt] = @all_sents_now[sent_cnt].gsub(/(^|\s)#{w}(\s+|$)/,"")
-					#				@all_sents_now[sent_cnt].gsub!(/(^\s)|(\s$)/,"")
-					#				next
-					#end
 					known_collo_flg = known_collo_chk(w)
 					known_flg = 0
 					@known_word.each {|kword|
@@ -177,46 +164,17 @@ class Epw
 						end
 						del_cnt = 0
 						while del_cnt < @all_sents.length do
-							#puts "success del"
-							#puts w
-							#puts "del"
 							@all_sents_now[del_cnt] = @all_sents_now[del_cnt].gsub(/(^|\s)#{w}(\s|$)/," ")
 							@all_sents_now[del_cnt].gsub!(/(^\s)|(\s$)/,"")
-							#@all_sents[del_cnt] = @all_sents[del_cnt].gsub(/#{w}(\s|$)/,"")
-							#puts @all_sents_now[del_cnt]
-							#puts @all_sents[del_cnt]
 							del_cnt += 1
 						end
 					rescue NONREGError => e
 						print(e.message,"\n")
 						#変化系はここで削除　本当に良いか要検討
-						#del_cnt = 0
-						#while del_cnt < @all_sents.length do
-						#				@all_sents[del_cnt] = @all_sents[del_cnt].gsub(/#{w}\s+/,"")
-						#				@all_sents_now[del_cnt] = @all_sents_now[del_cnt].gsub(/#{w}\s+/,"")
-						#				del_cnt += 1
-						#end
-
 						puts "IN NONREGErorr @all_sents_now[#{sent_cnt}] = #{@all_sents_now[sent_cnt]}"
-
-						#@words[word_cnt] = e.message
-						#@words.uniq
 						#原形、変化系をwhileつかって削除が必要?否、redo時に原形は消える
 
 						#これまで原形redo行ったものリスト(配列)化して重複回避が必要
-						#if @org_form_list.include?(e.message) then
-						#if @known_word.include?(e.message) then
-						#				puts "#{w}の原型は#{e.message}で@known_wordsに存在しているため"
-						#				puts "#{w}も@known_wordsに追加します"
-						#				del_cnt = 0
-						#				while del_cnt < @all_sents.length do
-						#								#@all_sents_now[del_cnt] = @all_sents_now[del_cnt].gsub(/(^|\s)#{w}(\s|$)/," ")
-						#								#@all_sents[del_cnt] = @all_sents[del_cnt].gsub(/(^|\s)#{w}(\s|$)/," ")
-						#								@all_sents_now[del_cnt] = @all_sents_now[del_cnt].gsub(/(^|\s)#{w}(\s|$)/," ")
-						#								@all_sents_now[del_cnt].gsub!(/(^\s)|(\s$)/,"")
-						#								del_cnt += 1
-						#				end
-						#else
 						puts "#{w}の原型は#{e.message}なので、@all_sents_nowの#{w}を"
 						puts "#{e.message}に置き換えて調べ直します。"
 						@all_sents_now[sent_cnt].gsub!(/^#{w}/,"#{e.message}")
@@ -354,7 +312,6 @@ class Epw
 			print("#{GOIMG_URL}".gsub(/%word%/,"#{word.gsub(/ /,"+")}"),"\n")
 			imgument = Nokogiri::HTML.parse(page_img,nil,"UTF-8")
 			count = 1
-			#			print(imgument.xpath(IMG_XPATH).length,"\n")
 			retstr = ""
 			imgument.xpath(IMG_XPATH).each do |img_url|
 				img_url = JSON.parse(img_url.text)
