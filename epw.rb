@@ -27,14 +27,13 @@ class Epw
 
 	def output_html
 		get_words
-		#sort_words あったものから消せばいい
+		#sort_words あったものから消せばいいtesttest
 		get_known_list
 		get_known_collo_list
 
 		words_htmls = get_words_htmls
 		csv = words_htmls.join("\n")
 
-		#	output csv
 	end
 
 	private
