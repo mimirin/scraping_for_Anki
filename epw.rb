@@ -38,6 +38,7 @@ class Epw
 
 	private
 	def get_words
+		#@はインスタンス変数　オブジェクトが保持し続ける変数のこと
 		@org_form_list = []
 		@all_doc = File.open("epw.txt", "r"){|f|f.read}
 		@all_doc = @all_doc.gsub(/\n+/,".")
@@ -45,26 +46,41 @@ class Epw
 		@all_doc = @all_doc.gsub(/[-\n]+/," ")
 		@all_doc = @all_doc.gsub(/[^a-zA-Z\s\(\)\[\]\{\}"'\.,]+/,"")
 
+		#対応した括弧でくくられる　を示す正規表現
 		reg = Regexp.new('(\([a-zA-Z\.,\s]*?\)|\[[a-zA-Z\.,\s]*?\]|\{[a-zA-Z\.,\s]*?\}|"[a-zA-Z\.,\s]*?"|\'[a-zA-Z\.,\s]*?\')')
+		$kaisuu = 0
 		while reg.match(@all_doc) do
+			puts $kaisuu
+			#$1はregそのもの　$2はreg以降のピリオドまで　ピリオドまでをおいて、その後$1(reg)から（）を削除したものをおいてピリオド
 			@all_doc = @all_doc.sub(/#{reg}(.*?\.)/){"#{$2}#{$1.gsub(/[^a-zA-Z\s]/,"")}\."}
+			$kaisuu = $kaisuu + 1
 		end
-		#@all_doc = @all_doc.gsub(/\s+(\.|,)/,'\1')
-		#@all_doc = @all_doc.gsub(/(\.|,)\s+/,'\1')
+		#ピリオド、カンマ直前のスペース（一個以上）を削除
 		@all_doc = @all_doc.gsub(/\s+(\.|,)/){$1}
+		#ピリオド、カンマ直後のスペース（一個以上）を削除
 		@all_doc = @all_doc.gsub(/(\.|,)\s+/){$1}
+		#一個以上のスペースを１個のスペースに置き換え
 		@all_doc = @all_doc.gsub(/\s+/," ")
+		#ピリオド、カンマ直後の大文字から始まる単語、小文字に修正　大文字以降すべて小文字のものだけ　改善すべき
 		@all_doc = @all_doc.gsub(/(?:^|.|,)[A-Z][a-z]+/){|s| s.downcase}
+		#アルファベット、スペース、ピリオド、カンマ以外削除
 		@all_doc = @all_doc.gsub(/[^a-zA-Z\s\.,]+/,"")
-		#if @all_doc.match(/(\s|\.|,)+the(\s|\.|,)+/,"")
-		#@all_doc = @all_doc.gsub(/(\s\.,)+([A-Z])[a-z]+/,"#{$2.downcase}")
-		@all_doc = @all_doc.gsub(/(\s|\.|,)+an\s/,'\1')
-		@all_doc = @all_doc.gsub(/\san(\.|,|\s)+/,'\1')
-		@all_doc = @all_doc.gsub(/(\s|\.|,)+a\s/,'\1')
-		@all_doc = @all_doc.gsub(/\sa(\.|,|\s)+/,'\1')
-		@all_doc = @all_doc.gsub(/(\s|\.|,)+the\s/,'\1')
-		@all_doc = @all_doc.gsub(/\sthe(\.|,|\s)+/,'\1')
+		#スペース、ピリオド、カンマ直後のanを削除
+		@all_doc = @all_doc.gsub(/(\s|\.|,)+an\s/){$1}
+		#スペース、ピリオド、カンマ直前のanを削除
+		@all_doc = @all_doc.gsub(/\san(\.|,|\s)+/){$1}
+		#スペース、ピリオド、カンマ直後のaを削除
+		@all_doc = @all_doc.gsub(/(\s|\.|,)+a\s/){$1}
+		#スペース、ピリオド、カンマ直前のaを削除
+		@all_doc = @all_doc.gsub(/\sa(\.|,|\s)+/){$1}
+		#スペース、ピリオド、カンマ直後のtheを削除
+		@all_doc = @all_doc.gsub(/(\s|\.|,)+the\s/){$1}
+		#スペース、ピリオド、カンマ直前のtheを削除
+		@all_doc = @all_doc.gsub(/\sthe(\.|,|\s)+/){$1}
+		#->結局やってることは・・・
+
 		puts @all_doc
+		#@all_docはリスト化前
 		@all_doc_master = @all_doc
 		@all_sents = @all_doc.split(/\.|,/)
 		@all_sents.each_with_index {|sents,i|
